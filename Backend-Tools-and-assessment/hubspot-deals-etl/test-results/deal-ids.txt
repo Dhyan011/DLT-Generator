@@ -1,0 +1,11 @@
+# HubSpot Test Deal IDs
+# After creating each deal in HubSpot, paste the deal ID from the URL into the "Deal ID" column.
+# URL format: https://app.hubspot.com/contacts/<portal>/deal/<DEAL_ID>/
+
+| #  | Deal Name               | Stage                   | Amount    | Close Date   | Deal ID (fill in) |
+|----|-------------------------|-------------------------|-----------|--------------|-------------------|
+| 1  | Alpha Prospect          | qualifiedtobuy          | $5,000    | 2025-01-31   |317193990854       |
+| 2  | Beta Demo Account       | presentationscheduled   | $25,000   | 2025-02-28   |317243938513       |
+| 3  | Gamma Enterprise Win    | closedwon               | $75,000   | 2024-12-15   |317243938516       |
+| 4  | Delta Churned Lead      | closedlost              | $50,000   | 2024-11-30   |317194714872       |
+| 5  | Epsilon Strategic Deal  | decisionmakerboughtin   | $100,000  | 03/17/2026   |317245375185       |

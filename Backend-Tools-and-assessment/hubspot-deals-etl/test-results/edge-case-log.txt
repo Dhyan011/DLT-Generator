@@ -1,0 +1,94 @@
+# Edge Case Log
+
+Record the responses for each edge case test below.
+
+---
+
+## 1. Empty / Invalid Access Token → Expected: 401
+
+```bash
+curl -X POST http://localhost:5200/api/v1/scan/start \
+  -H "Content-Type: application/json" \
+  -d '{"access_token":"invalid-token","tenant_id":"test-tenant"}'
+```
+
+**Status Code:** `<expected 401>`
+**Response Body:**
+```
+<paste output here>
+```
+
+---
+
+## 2. Non-existent Job ID → Expected: 404
+
+```bash
+curl http://localhost:5200/api/v1/scan/status/00000000-0000-0000-0000-000000000000
+```
+
+**Status Code:** `<expected 404>`
+**Response Body:**
+```
+<paste output here>
+```
+
+---
+
+## 3. Retrieve Results for In-Progress Job → Expected: 409
+
+```bash
+# Start a job first, then immediately call result before it completes
+curl http://localhost:5200/api/v1/scan/result/<IN_PROGRESS_JOB_ID>
+```
+
+**Status Code:** `<expected 409>`
+**Response Body:**
+```
+<paste output here>
+```
+
+---
+
+## 4. Cancel Already-Completed Job → Expected: 409
+
+```bash
+curl -X POST http://localhost:5200/api/v1/scan/cancel/<COMPLETED_JOB_ID>
+```
+
+**Status Code:** `<expected 409>`
+**Response Body:**
+```
+<paste output here>
+```
+
+---
+
+## 5. Malformed JSON Body → Expected: 400
+
+```bash
+curl -X POST http://localhost:5200/api/v1/scan/start \
+  -H "Content-Type: application/json" \
+  -d 'not-json-at-all'
+```
+
+**Status Code:** `<expected 400>`
+**Response Body:**
+```
+<paste output here>
+```
+
+---
+
+## 6. Missing Required Field → Expected: 422
+
+```bash
+curl -X POST http://localhost:5200/api/v1/scan/start \
+  -H "Content-Type: application/json" \
+  -d '{"tenant_id":"test-tenant"}'
+```
+
+**Status Code:** `<expected 422>`
+**Response Body:**
+```
+<paste output here>
+```

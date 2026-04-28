@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>HubSpot Deals ETL — Nucleios</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/static/style.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">N</div>
+    <div class="logo-text">Nucleios ETL<span>HubSpot Deals Pipeline</span></div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Main</div>
+    <a class="nav-item active" onclick="showPage('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" onclick="showPage('extraction')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      New Extraction
+    </a>
+    <a class="nav-item" onclick="showPage('jobs')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Extraction Jobs
+    </a>
+    <a class="nav-item" onclick="showPage('deals')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Deals Records
+    </a>
+    <a class="nav-item" onclick="showPage('statistics')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Statistics
+    </a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Maintenance</div>
+    <a class="nav-item" onclick="showPage('maintenance')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      Maintenance
+    </a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="health-badge">
+      <div class="health-dot" id="healthDot"></div>
+      <div class="health-text" id="healthText">Checking...</div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="pageTitle">Dashboard</div>
+    <div class="topbar-actions">
+      <button class="btn btn-outline btn-sm" onclick="refreshCurrent()">↻ Refresh</button>
+      <button class="btn btn-primary btn-sm" onclick="showPage('extraction')">+ New Extraction</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD PAGE -->
+    <div id="page-dashboard" class="page active">
+      <div class="stats-grid">
+        <div class="stat-card blue"><div class="stat-label">Total Jobs</div><div class="stat-value" id="statTotal">—</div><div class="stat-sub">All time</div></div>
+        <div class="stat-card green"><div class="stat-label">Completed</div><div class="stat-value" id="statCompleted">—</div><div class="stat-sub">Successfully processed</div></div>
+        <div class="stat-card orange"><div class="stat-label">In Progress</div><div class="stat-value" id="statRunning">—</div><div class="stat-sub">Currently running</div></div>
+        <div class="stat-card purple"><div class="stat-label">Records Extracted</div><div class="stat-value" id="statRecords">—</div><div class="stat-sub">Total deals loaded</div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:24px;margin-bottom:24px;">
+        <div class="table-card" style="padding:20px;">
+          <div class="section-title" style="margin-bottom:16px;">Job Success Rate</div>
+          <div style="height: 220px; position: relative;">
+            <canvas id="dashboardStatusChart"></canvas>
+          </div>
+        </div>
+        <div class="table-card" style="padding:20px;display:flex;flex-direction:column;justify-content:center;">
+          <h3 style="margin-top:0;margin-bottom:8px;font-size:16px;color:var(--sf-text);">Welcome back to Nucleios ETL</h3>
+          <p style="color:var(--sf-muted);font-size:14px;line-height:1.5;">Your HubSpot Deals extraction dashboard is active and receiving live events. You can manage extractions, monitor real-time polling, and view processed deal records. Use the sidebar to navigate between your analytics and maintenance tools.</p>
+        </div>
+      </div>
+
+      <div class="section-header"><div class="section-title">Recent Jobs</div><button class="btn btn-outline btn-sm" onclick="showPage('jobs')">View All</button></div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th>Scan ID</th><th>Organization</th><th>Status</th><th>Records</th><th>Duration</th><th>Started</th><th>Actions</th></tr></thead>
+          <tbody id="recentJobsTable"><tr><td colspan="7" class="table-empty">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- EXTRACTION PAGE -->
+    <div id="page-extraction" class="page">
+      <div class="form-card">
+        <h3>🚀 Start New Extraction Job</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Scan ID <span>*</span></label>
+            <input id="fScanId" class="form-input" placeholder="e.g. scan-2024-001" />
+            <div class="form-hint">Unique identifier for this extraction job</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Organization ID <span>*</span></label>
+            <input id="fOrgId" class="form-input" placeholder="e.g. my-company" />
+          </div>
+          <div class="form-group full">
+            <label class="form-label">HubSpot Access Token <span>*</span></label>
+            <input id="fToken" class="form-input" type="password" placeholder="pat-na1-xxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
+            <div class="form-hint">Private App token with crm.objects.deals.read scope</div>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Properties to Extract</label>
+            <div class="flex" style="flex-wrap:wrap;gap:6px;margin-bottom:8px" id="propertyTags">
+              <span class="tag" onclick="removeTag(this)">dealname ×</span>
+              <span class="tag" onclick="removeTag(this)">amount ×</span>
+              <span class="tag" onclick="removeTag(this)">dealstage ×</span>
+              <span class="tag" onclick="removeTag(this)">closedate ×</span>
+              <span class="tag" onclick="removeTag(this)">pipeline ×</span>
+              <span class="tag" onclick="removeTag(this)">hubspot_owner_id ×</span>
+              <span class="tag" onclick="removeTag(this)">createdate ×</span>
+              <span class="tag" onclick="removeTag(this)">hs_lastmodifieddate ×</span>
+            </div>
+            <div class="flex">
+              <input id="propInput" class="form-input" placeholder="Add property name..." style="max-width:260px"/>
+              <button class="btn btn-outline btn-sm" onclick="addProperty()">Add</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Include Archived Deals</label>
+            <select id="fArchived" class="form-select">
+              <option value="false">No (Active deals only)</option>
+              <option value="true">Yes (Include archived)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="startExtraction()">▶ Start Extraction</button>
+          <button class="btn btn-outline" onclick="resetForm()">Clear Form</button>
+        </div>
+      </div>
+
+      <div id="liveJobCard" style="display:none">
+        <div class="form-card">
+          <h3>📊 Live Job Progress</h3>
+          <div class="info-grid">
+            <div class="info-item"><label>Scan ID</label><p id="liveId">—</p></div>
+            <div class="info-item"><label>Status</label><p id="liveStatus">—</p></div>
+            <div class="info-item"><label>Records</label><p id="liveRecords">—</p></div>
+            <div class="info-item"><label>Duration</label><p id="liveDuration">—</p></div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="liveProgress" style="width:0%"></div></div>
+          <div class="text-sm text-muted" id="livePhase"></div>
+          <div class="form-actions">
+            <button class="btn btn-outline btn-sm" onclick="pauseJob(currentScanId)">⏸ Pause</button>
+            <button class="btn btn-danger btn-sm" onclick="cancelJob(currentScanId)">✕ Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JOBS PAGE -->
+    <div id="page-jobs" class="page">
+      <div class="table-card">
+        <div class="table-toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="jobSearch" oninput="filterJobs()" placeholder="Search jobs..." />
+          </div>
+          <div class="flex">
+            <select id="jobStatusFilter" class="form-select" style="width:150px;padding:6px 10px;font-size:12px" onchange="filterJobs()">
+              <option value="">All Statuses</option>
+              <option value="completed">Completed</option>
+              <option value="in_progress">In Progress</option>
+              <option value="pending">Pending</option>
+              <option value="failed">Failed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="paused">Paused</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="loadJobs()">↻</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Scan ID</th><th>Organization</th><th>Status</th><th>Records</th><th>Duration</th><th>Started</th><th>Ended</th><th>Actions</th></tr></thead>
+          <tbody id="jobsTable"><tr><td colspan="8" class="table-empty">Loading...</td></tr></tbody>
+        </table>
+        <div class="table-footer">
+          <span id="jobCount">0 jobs</span>
+          <div class="pagination" id="jobPagination"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEALS PAGE -->
+    <div id="page-deals" class="page">
+      <div class="table-card">
+        <div class="table-toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="dealSearch" oninput="searchDeals()" placeholder="Search by scan ID..." />
+          </div>
+          <div class="flex">
+            <input id="dealScanFilter" class="form-input" placeholder="Scan ID to load..." style="width:200px;padding:6px 12px;font-size:12px"/>
+            <button class="btn btn-primary btn-sm" onclick="loadDeals()">Load Deals</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Deal ID</th><th>Deal Name</th><th>Stage</th><th>Amount</th><th>Close Date</th><th>Owner</th><th>Is Won</th><th>Extracted At</th></tr></thead>
+          <tbody id="dealsTable"><tr><td colspan="8" class="table-empty">Enter a Scan ID above and click "Load Deals"</td></tr></tbody>
+        </table>
+        <div class="table-footer">
+          <span id="dealCount">0 records</span>
+          <div class="pagination" id="dealPagination"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATISTICS PAGE -->
+    <div id="page-statistics" class="page">
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card blue"><div class="stat-label">Loading...</div><div class="stat-value">—</div></div>
+      </div>
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;">
+        <div class="table-card" style="padding:20px;">
+          <div class="section-title" style="margin-bottom:16px;">Jobs by Organization</div>
+          <div style="height: 280px; position: relative;"><canvas id="statsOrgJobsChart"></canvas></div>
+        </div>
+        <div class="table-card" style="padding:20px;">
+          <div class="section-title" style="margin-bottom:16px;">Records by Organization</div>
+          <div style="height: 280px; position: relative;"><canvas id="statsOrgRecordsChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-toolbar"><span class="section-title">Job Statistics by Organization</span></div>
+        <table>
+          <thead><tr><th>Organization</th><th>Total Jobs</th><th>Completed</th><th>Failed</th><th>Records</th><th>Last Run</th></tr></thead>
+          <tbody id="statsTable"><tr><td colspan="6" class="table-empty">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MAINTENANCE PAGE -->
+    <div id="page-maintenance" class="page">
+      <div class="form-card">
+        <h3>🧹 Cleanup Old Jobs</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Remove jobs older than (days)</label>
+            <input id="cleanupDays" class="form-input" type="number" value="7" min="1" max="365"/>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-danger" onclick="runCleanup()">🗑 Run Cleanup</button>
+        </div>
+      </div>
+      <div class="form-card">
+        <h3>🔍 Detect Crashed Jobs</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Timeout threshold (minutes)</label>
+            <input id="crashTimeout" class="form-input" type="number" value="10" min="1" max="60"/>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-outline" onclick="detectCrashed()">🔎 Detect Crashed</button>
+        </div>
+        <div id="crashResult" style="margin-top:16px"></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- JOB DETAIL PANEL -->
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+<div class="side-panel" id="sidePanel">
+  <div class="panel-header">
+    <h3>Job Details</h3>
+    <button class="btn-icon" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-body" id="panelBody">Loading...</div>
+  <div class="panel-actions" id="panelActions"></div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

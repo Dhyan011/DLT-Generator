@@ -1,0 +1,113 @@
+# Validation Log
+
+Record all curl command outputs here as you validate the running service.
+
+## How to Run
+
+Start services first:
+```bash
+docker-compose up -d --build
+```
+
+---
+
+## 1. Health Check
+
+```bash
+curl http://localhost:5200/api/v1/health
+```
+
+**Output:**
+```
+<paste output here>
+```
+
+---
+
+## 2. Start Extraction
+
+```bash
+curl -X POST http://localhost:5200/api/v1/scan/start \
+  -H "Content-Type: application/json" \
+  -d '{
+    "access_token": "<YOUR_TOKEN>",
+    "tenant_id": "test-tenant",
+    "properties": ["dealname","amount","dealstage","closedate","pipeline"]
+  }'
+```
+
+**Output:**
+```
+<paste output here>
+```
+
+**Job ID:** `<copy job_id from above response>`
+
+---
+
+## 3. Poll Status
+
+```bash
+curl http://localhost:5200/api/v1/scan/status/<JOB_ID>
+```
+
+**Output:**
+```
+<paste output here>
+```
+
+---
+
+## 4. Retrieve Results
+
+```bash
+curl "http://localhost:5200/api/v1/scan/result/<JOB_ID>?limit=100&offset=0"
+```
+
+**Output:**
+```
+<paste output here>
+```
+
+---
+
+## 5. Verify in PostgreSQL
+
+```bash
+psql -U etl_user -d hubspot_etl -c \
+  "SELECT deal_id, deal_name, deal_stage, amount FROM hubspot_deals WHERE _tenant_id='test-tenant';"
+```
+
+**Output:**
+```
+<paste output here>
+```
+
+---
+
+## 6. Checkpoint Interruption Test
+
+Steps:
+1. Start a new extraction job (step 2 above)
+2. While in_progress, kill the Docker service: `docker-compose stop app`
+3. Restart: `docker-compose start app`
+4. Check status — job should auto-resume or show checkpoint data
+5. Verify no duplicate records in DB
+
+**Result:**
+```
+<paste output here>
+```
+
+---
+
+## 7. Cleanup
+
+```bash
+curl -X DELETE http://localhost:5200/api/v1/scan/remove/<JOB_ID>
+```
+
+**Output:**
+```
+<paste output here>
+```
