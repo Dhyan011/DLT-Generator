@@ -391,6 +391,22 @@ Enable detailed logging for debugging:
 }
 ```
 
+### HubSpot Deals ETL with 3D Dashboard
+
+```json
+{
+  "project_name": "hubspot-deals-etl",
+  "service_name": "hubspot",
+  "destination_dir": "./Backend-Tools-and-assessment",
+  "ports": {
+    "dev": 5100,
+    "stage": 5101,
+    "prod": 5102
+  }
+}
+```
+*Note: Includes a premium 3D frontend dashboard for monitoring ETL pipelines and seeding dummy data.*
+
 ## 🤝 Contributing
 
 1. Fork the repository
