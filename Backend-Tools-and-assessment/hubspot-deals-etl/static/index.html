@@ -3,12 +3,78 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>HubSpot Deals ETL — Nucleios</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="/static/style.css" />
+<title>Nucleios DLT — HubSpot Deals ETL Platform</title>
+<meta name="description" content="Production-grade HubSpot Deals ETL extraction platform built with DLT framework. Designed & developed by Dhyan Patel."/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/static/style.css"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
+
+<!-- ═══════════ 3D HERO INTRO SCREEN ═══════════ -->
+<div id="introScreen" class="intro-screen">
+  <canvas id="heroCanvas"></canvas>
+  <div class="intro-content">
+    <div class="intro-badge" id="introBadge">
+      <span class="intro-badge-dot"></span>
+      <span>DLT Generator v2.0</span>
+    </div>
+    <h1 class="intro-title" id="introTitle">
+      <span class="title-line line-1">Nucleios</span>
+      <span class="title-line line-2">DLT Platform</span>
+    </h1>
+    <p class="intro-subtitle" id="introSubtitle">A CLI-driven DLT Generator that scaffolds production-grade ETL services from templates — featuring HubSpot Deals extraction with Flask REST API, PostgreSQL warehouse, Redis caching, multi-environment Docker, and real-time monitoring dashboard.</p>
+    <div class="intro-developer" id="introDev">
+      <div class="dev-avatar">DP</div>
+      <div class="dev-info">
+        <span class="dev-label">Designed & Developed by</span>
+        <span class="dev-name">Dhyan Patel</span>
+      </div>
+    </div>
+    <div class="intro-stats" id="introStats">
+      <div class="intro-stat">
+        <span class="intro-stat-value" data-count="25614">0</span>
+        <span class="intro-stat-label">Lines of Code</span>
+      </div>
+      <div class="intro-stat">
+        <span class="intro-stat-value" data-count="83">0</span>
+        <span class="intro-stat-label">Source Files</span>
+      </div>
+      <div class="intro-stat">
+        <span class="intro-stat-value" data-count="12">0</span>
+        <span class="intro-stat-label">REST Endpoints</span>
+      </div>
+      <div class="intro-stat">
+        <span class="intro-stat-value" data-count="4">0</span>
+        <span class="intro-stat-label">Docker Envs</span>
+      </div>
+    </div>
+    <button class="intro-cta" id="enterBtn" onclick="enterDashboard()">
+      <span>Enter Dashboard</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+    <div class="intro-tech-stack" id="introTech">
+      <span class="tech-pill">Python 3.8+</span>
+      <span class="tech-pill">Flask-RESTX</span>
+      <span class="tech-pill">DLT Framework</span>
+      <span class="tech-pill">PostgreSQL</span>
+      <span class="tech-pill">Redis</span>
+      <span class="tech-pill">Docker Compose</span>
+      <span class="tech-pill">SQLAlchemy</span>
+      <span class="tech-pill">Marshmallow</span>
+      <span class="tech-pill">Grafana Loki</span>
+      <span class="tech-pill">Gunicorn</span>
+    </div>
+  </div>
+  <div class="scroll-indicator" id="scrollHint">
+    <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
+    <span>Scroll or click to enter</span>
+  </div>
+</div>
+
+<!-- ═══════════ MAIN APP (hidden initially) ═══════════ -->
+<div id="appContainer" class="app-container hidden">
 
 <!-- SIDEBAR -->
 <nav class="sidebar">
@@ -47,6 +113,13 @@
     </a>
   </div>
   <div class="sidebar-bottom">
+    <div class="dev-credit-sidebar">
+      <div class="dev-avatar-sm">DP</div>
+      <div class="dev-credit-text">
+        <span class="dev-credit-name">Dhyan Patel</span>
+        <span class="dev-credit-role">Developer</span>
+      </div>
+    </div>
     <div class="health-badge">
       <div class="health-dot" id="healthDot"></div>
       <div class="health-text" id="healthText">Checking...</div>
@@ -74,24 +147,37 @@
         <div class="stat-card orange"><div class="stat-label">In Progress</div><div class="stat-value" id="statRunning">—</div><div class="stat-sub">Currently running</div></div>
         <div class="stat-card purple"><div class="stat-label">Records Extracted</div><div class="stat-value" id="statRecords">—</div><div class="stat-sub">Total deals loaded</div></div>
       </div>
-
       <div style="display:grid;grid-template-columns:1fr 2fr;gap:24px;margin-bottom:24px;">
         <div class="table-card" style="padding:20px;">
           <div class="section-title" style="margin-bottom:16px;">Job Success Rate</div>
-          <div style="height: 220px; position: relative;">
-            <canvas id="dashboardStatusChart"></canvas>
-          </div>
+          <div style="height: 220px; position: relative;"><canvas id="dashboardStatusChart"></canvas></div>
         </div>
         <div class="table-card" style="padding:20px;display:flex;flex-direction:column;justify-content:center;">
-          <h3 style="margin-top:0;margin-bottom:8px;font-size:16px;color:var(--sf-text);">Welcome back to Nucleios ETL</h3>
-          <p style="color:var(--sf-muted);font-size:14px;line-height:1.5;">Your HubSpot Deals extraction dashboard is active and receiving live events. You can manage extractions, monitor real-time polling, and view processed deal records. Use the sidebar to navigate between your analytics and maintenance tools.</p>
+          <h3 style="margin-top:0;margin-bottom:8px;font-size:16px;color:var(--sf-text);">Nucleios DLT — HubSpot Deals Pipeline</h3>
+          <p style="color:var(--sf-muted);font-size:13px;line-height:1.6;margin-bottom:12px;">This ETL service was generated using the <strong>DLT Generator CLI</strong> — a template-based scaffolding tool that creates production-ready data pipeline services with placeholder replacement.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div style="padding:10px;background:#f8f7ff;border-radius:8px;border-left:3px solid #667eea;">
+              <div style="font-size:11px;font-weight:700;color:#667eea;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Scan API</div>
+              <div style="font-size:11px;color:var(--sf-muted);">Start, cancel, pause, list, stats</div>
+            </div>
+            <div style="padding:10px;background:#f0fdf4;border-radius:8px;border-left:3px solid #22c55e;">
+              <div style="font-size:11px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Data Pipeline</div>
+              <div style="font-size:11px;color:var(--sf-muted);">DLT source → PostgreSQL sink</div>
+            </div>
+            <div style="padding:10px;background:#fefce8;border-radius:8px;border-left:3px solid #f59e0b;">
+              <div style="font-size:11px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Infrastructure</div>
+              <div style="font-size:11px;color:var(--sf-muted);">Docker dev/stage/prod profiles</div>
+            </div>
+            <div style="padding:10px;background:#faf5ff;border-radius:8px;border-left:3px solid #a855f7;">
+              <div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Observability</div>
+              <div style="font-size:11px;color:var(--sf-muted);">Loki logging + health checks</div>
+            </div>
+          </div>
         </div>
       </div>
-
       <div class="section-header"><div class="section-title">Recent Jobs</div><button class="btn btn-outline btn-sm" onclick="showPage('jobs')">View All</button></div>
       <div class="table-card">
-        <table>
-          <thead><tr><th>Scan ID</th><th>Organization</th><th>Status</th><th>Records</th><th>Duration</th><th>Started</th><th>Actions</th></tr></thead>
+        <table><thead><tr><th>Scan ID</th><th>Organization</th><th>Status</th><th>Records</th><th>Duration</th><th>Started</th><th>Actions</th></tr></thead>
           <tbody id="recentJobsTable"><tr><td colspan="7" class="table-empty">Loading...</td></tr></tbody>
         </table>
       </div>
@@ -102,51 +188,19 @@
       <div class="form-card">
         <h3>🚀 Start New Extraction Job</h3>
         <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Scan ID <span>*</span></label>
-            <input id="fScanId" class="form-input" placeholder="e.g. scan-2024-001" />
-            <div class="form-hint">Unique identifier for this extraction job</div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Organization ID <span>*</span></label>
-            <input id="fOrgId" class="form-input" placeholder="e.g. my-company" />
-          </div>
-          <div class="form-group full">
-            <label class="form-label">HubSpot Access Token <span>*</span></label>
-            <input id="fToken" class="form-input" type="password" placeholder="pat-na1-xxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
-            <div class="form-hint">Private App token with crm.objects.deals.read scope</div>
-          </div>
-          <div class="form-group full">
-            <label class="form-label">Properties to Extract</label>
+          <div class="form-group"><label class="form-label">Scan ID <span>*</span></label><input id="fScanId" class="form-input" placeholder="e.g. scan-2024-001"/><div class="form-hint">Unique identifier for this extraction job</div></div>
+          <div class="form-group"><label class="form-label">Organization ID <span>*</span></label><input id="fOrgId" class="form-input" placeholder="e.g. my-company"/></div>
+          <div class="form-group full"><label class="form-label">HubSpot Access Token <span>*</span></label><input id="fToken" class="form-input" type="password" placeholder="pat-na1-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"/><div class="form-hint">Private App token with crm.objects.deals.read scope</div></div>
+          <div class="form-group full"><label class="form-label">Properties to Extract</label>
             <div class="flex" style="flex-wrap:wrap;gap:6px;margin-bottom:8px" id="propertyTags">
-              <span class="tag" onclick="removeTag(this)">dealname ×</span>
-              <span class="tag" onclick="removeTag(this)">amount ×</span>
-              <span class="tag" onclick="removeTag(this)">dealstage ×</span>
-              <span class="tag" onclick="removeTag(this)">closedate ×</span>
-              <span class="tag" onclick="removeTag(this)">pipeline ×</span>
-              <span class="tag" onclick="removeTag(this)">hubspot_owner_id ×</span>
-              <span class="tag" onclick="removeTag(this)">createdate ×</span>
-              <span class="tag" onclick="removeTag(this)">hs_lastmodifieddate ×</span>
+              <span class="tag" onclick="removeTag(this)">dealname ×</span><span class="tag" onclick="removeTag(this)">amount ×</span><span class="tag" onclick="removeTag(this)">dealstage ×</span><span class="tag" onclick="removeTag(this)">closedate ×</span><span class="tag" onclick="removeTag(this)">pipeline ×</span><span class="tag" onclick="removeTag(this)">hubspot_owner_id ×</span><span class="tag" onclick="removeTag(this)">createdate ×</span><span class="tag" onclick="removeTag(this)">hs_lastmodifieddate ×</span>
             </div>
-            <div class="flex">
-              <input id="propInput" class="form-input" placeholder="Add property name..." style="max-width:260px"/>
-              <button class="btn btn-outline btn-sm" onclick="addProperty()">Add</button>
-            </div>
+            <div class="flex"><input id="propInput" class="form-input" placeholder="Add property name..." style="max-width:260px"/><button class="btn btn-outline btn-sm" onclick="addProperty()">Add</button></div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Include Archived Deals</label>
-            <select id="fArchived" class="form-select">
-              <option value="false">No (Active deals only)</option>
-              <option value="true">Yes (Include archived)</option>
-            </select>
-          </div>
+          <div class="form-group"><label class="form-label">Include Archived Deals</label><select id="fArchived" class="form-select"><option value="false">No (Active deals only)</option><option value="true">Yes (Include archived)</option></select></div>
         </div>
-        <div class="form-actions">
-          <button class="btn btn-primary" onclick="startExtraction()">▶ Start Extraction</button>
-          <button class="btn btn-outline" onclick="resetForm()">Clear Form</button>
-        </div>
+        <div class="form-actions"><button class="btn btn-primary" onclick="startExtraction()">▶ Start Extraction</button><button class="btn btn-outline" onclick="resetForm()">Clear Form</button></div>
       </div>
-
       <div id="liveJobCard" style="display:none">
         <div class="form-card">
           <h3>📊 Live Job Progress</h3>
@@ -170,31 +224,16 @@
     <div id="page-jobs" class="page">
       <div class="table-card">
         <div class="table-toolbar">
-          <div class="search-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input id="jobSearch" oninput="filterJobs()" placeholder="Search jobs..." />
-          </div>
+          <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="jobSearch" oninput="filterJobs()" placeholder="Search jobs..."/></div>
           <div class="flex">
-            <select id="jobStatusFilter" class="form-select" style="width:150px;padding:6px 10px;font-size:12px" onchange="filterJobs()">
-              <option value="">All Statuses</option>
-              <option value="completed">Completed</option>
-              <option value="in_progress">In Progress</option>
-              <option value="pending">Pending</option>
-              <option value="failed">Failed</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="paused">Paused</option>
-            </select>
+            <select id="jobStatusFilter" class="form-select" style="width:150px;padding:6px 10px;font-size:12px" onchange="filterJobs()"><option value="">All Statuses</option><option value="completed">Completed</option><option value="in_progress">In Progress</option><option value="pending">Pending</option><option value="failed">Failed</option><option value="cancelled">Cancelled</option><option value="paused">Paused</option></select>
             <button class="btn btn-outline btn-sm" onclick="loadJobs()">↻</button>
           </div>
         </div>
-        <table>
-          <thead><tr><th>Scan ID</th><th>Organization</th><th>Status</th><th>Records</th><th>Duration</th><th>Started</th><th>Ended</th><th>Actions</th></tr></thead>
+        <table><thead><tr><th>Scan ID</th><th>Organization</th><th>Status</th><th>Records</th><th>Duration</th><th>Started</th><th>Ended</th><th>Actions</th></tr></thead>
           <tbody id="jobsTable"><tr><td colspan="8" class="table-empty">Loading...</td></tr></tbody>
         </table>
-        <div class="table-footer">
-          <span id="jobCount">0 jobs</span>
-          <div class="pagination" id="jobPagination"></div>
-        </div>
+        <div class="table-footer"><span id="jobCount">0 jobs</span><div class="pagination" id="jobPagination"></div></div>
       </div>
     </div>
 
@@ -202,47 +241,26 @@
     <div id="page-deals" class="page">
       <div class="table-card">
         <div class="table-toolbar">
-          <div class="search-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input id="dealSearch" oninput="searchDeals()" placeholder="Search by scan ID..." />
-          </div>
-          <div class="flex">
-            <input id="dealScanFilter" class="form-input" placeholder="Scan ID to load..." style="width:200px;padding:6px 12px;font-size:12px"/>
-            <button class="btn btn-primary btn-sm" onclick="loadDeals()">Load Deals</button>
-          </div>
+          <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="dealSearch" oninput="searchDeals()" placeholder="Search by scan ID..."/></div>
+          <div class="flex"><input id="dealScanFilter" class="form-input" placeholder="Scan ID to load..." style="width:200px;padding:6px 12px;font-size:12px"/><button class="btn btn-primary btn-sm" onclick="loadDeals()">Load Deals</button></div>
         </div>
-        <table>
-          <thead><tr><th>Deal ID</th><th>Deal Name</th><th>Stage</th><th>Amount</th><th>Close Date</th><th>Owner</th><th>Is Won</th><th>Extracted At</th></tr></thead>
+        <table><thead><tr><th>Deal ID</th><th>Deal Name</th><th>Stage</th><th>Amount</th><th>Close Date</th><th>Owner</th><th>Is Won</th><th>Extracted At</th></tr></thead>
           <tbody id="dealsTable"><tr><td colspan="8" class="table-empty">Enter a Scan ID above and click "Load Deals"</td></tr></tbody>
         </table>
-        <div class="table-footer">
-          <span id="dealCount">0 records</span>
-          <div class="pagination" id="dealPagination"></div>
-        </div>
+        <div class="table-footer"><span id="dealCount">0 records</span><div class="pagination" id="dealPagination"></div></div>
       </div>
     </div>
 
     <!-- STATISTICS PAGE -->
     <div id="page-statistics" class="page">
-      <div class="stats-grid" id="statsGrid">
-        <div class="stat-card blue"><div class="stat-label">Loading...</div><div class="stat-value">—</div></div>
-      </div>
-      
+      <div class="stats-grid" id="statsGrid"><div class="stat-card blue"><div class="stat-label">Loading...</div><div class="stat-value">—</div></div></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;">
-        <div class="table-card" style="padding:20px;">
-          <div class="section-title" style="margin-bottom:16px;">Jobs by Organization</div>
-          <div style="height: 280px; position: relative;"><canvas id="statsOrgJobsChart"></canvas></div>
-        </div>
-        <div class="table-card" style="padding:20px;">
-          <div class="section-title" style="margin-bottom:16px;">Records by Organization</div>
-          <div style="height: 280px; position: relative;"><canvas id="statsOrgRecordsChart"></canvas></div>
-        </div>
+        <div class="table-card" style="padding:20px;"><div class="section-title" style="margin-bottom:16px;">Jobs by Organization</div><div style="height: 280px; position: relative;"><canvas id="statsOrgJobsChart"></canvas></div></div>
+        <div class="table-card" style="padding:20px;"><div class="section-title" style="margin-bottom:16px;">Records by Organization</div><div style="height: 280px; position: relative;"><canvas id="statsOrgRecordsChart"></canvas></div></div>
       </div>
-
       <div class="table-card">
         <div class="table-toolbar"><span class="section-title">Job Statistics by Organization</span></div>
-        <table>
-          <thead><tr><th>Organization</th><th>Total Jobs</th><th>Completed</th><th>Failed</th><th>Records</th><th>Last Run</th></tr></thead>
+        <table><thead><tr><th>Organization</th><th>Total Jobs</th><th>Completed</th><th>Failed</th><th>Records</th><th>Last Run</th></tr></thead>
           <tbody id="statsTable"><tr><td colspan="6" class="table-empty">Loading...</td></tr></tbody>
         </table>
       </div>
@@ -252,27 +270,13 @@
     <div id="page-maintenance" class="page">
       <div class="form-card">
         <h3>🧹 Cleanup Old Jobs</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Remove jobs older than (days)</label>
-            <input id="cleanupDays" class="form-input" type="number" value="7" min="1" max="365"/>
-          </div>
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-danger" onclick="runCleanup()">🗑 Run Cleanup</button>
-        </div>
+        <div class="form-grid"><div class="form-group"><label class="form-label">Remove jobs older than (days)</label><input id="cleanupDays" class="form-input" type="number" value="7" min="1" max="365"/></div></div>
+        <div class="form-actions"><button class="btn btn-danger" onclick="runCleanup()">🗑 Run Cleanup</button></div>
       </div>
       <div class="form-card">
         <h3>🔍 Detect Crashed Jobs</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Timeout threshold (minutes)</label>
-            <input id="crashTimeout" class="form-input" type="number" value="10" min="1" max="60"/>
-          </div>
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-outline" onclick="detectCrashed()">🔎 Detect Crashed</button>
-        </div>
+        <div class="form-grid"><div class="form-group"><label class="form-label">Timeout threshold (minutes)</label><input id="crashTimeout" class="form-input" type="number" value="10" min="1" max="60"/></div></div>
+        <div class="form-actions"><button class="btn btn-outline" onclick="detectCrashed()">🔎 Detect Crashed</button></div>
         <div id="crashResult" style="margin-top:16px"></div>
       </div>
     </div>
@@ -280,13 +284,12 @@
   </div><!-- /content -->
 </div><!-- /main -->
 
+</div><!-- /appContainer -->
+
 <!-- JOB DETAIL PANEL -->
 <div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
 <div class="side-panel" id="sidePanel">
-  <div class="panel-header">
-    <h3>Job Details</h3>
-    <button class="btn-icon" onclick="closePanel()">✕</button>
-  </div>
+  <div class="panel-header"><h3>Job Details</h3><button class="btn-icon" onclick="closePanel()">✕</button></div>
   <div class="panel-body" id="panelBody">Loading...</div>
   <div class="panel-actions" id="panelActions"></div>
 </div>
